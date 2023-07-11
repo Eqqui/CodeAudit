@@ -9,6 +9,8 @@ from os.path import split as split_pathname
 from tools.text_area import TextArea
 from find.find import FindForm
 from function.function import functionForm
+from config.config import Config
+from analysis.analysis import Analysis
 from ui.functionWidget import Ui_functionDialog
 
 
@@ -25,6 +27,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 初始化
         self.splitter_2.setSizes([20, 250, 20])
         self.splitter.setSizes([200, 10])
+        self.config = Config()
+        self.config_ini = self.config.read_config()
 
     def slot(self):
         # 槽函数
@@ -66,6 +70,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             textEdit.setAutoFillBackground(True)
             self.tabWidget.addTab(textEdit, textEdit.get_name())
             self.tabWidget.setCurrentWidget(textEdit)
+            a = Analysis(fileName, self.config_ini)
+            func = a.run()
+            print(a.filelist)
+            for f in a.funlist:
+                print(f.filepath)
+            print(a.filename)
+            print(func)
 
             if isMain:
                 self.model.setRootPath(path)
