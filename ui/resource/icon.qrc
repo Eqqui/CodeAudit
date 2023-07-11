@@ -1,0 +1,18 @@
+<RCC>
+  <qresource prefix="img">
+    <file>img/baogao.png</file>
+    <file>img/chazhao.png</file>
+    <file>img/chexiao.png</file>
+    <file>img/closeall.png</file>
+    <file>img/close.png</file>
+    <file>img/exit-full.png</file>
+    <file>img/fengxian.png</file>
+    <file>img/fuzhi.png</file>
+    <file>img/jianqie.png</file>
+    <file>img/niantie.png</file>
+    <file>img/save.png</file>
+    <file>img/saveas.png</file>
+    <file>img/zhongduan.png</file>
+    <file>img/open-file.png</file>
+  </qresource>
+</RCC>

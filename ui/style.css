@@ -1,0 +1,8 @@
+*{{
+    font-family: SimSun, Arial, sans-serif;
+    font-size: 20px;
+}}
+
+QMenuBar, QMenu{{
+  background-color: white;
+}}
