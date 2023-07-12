@@ -77,7 +77,7 @@ class Analysis(QtCore.QObject):
             split_line = line.split('\t')
             func = Function(name=split_line[0], filepath=split_line[1])
             if len(split_line) == 8 or len(split_line) == 6:
-                func.line = split_line[4]
+                func.line = split_line[4].split(":")[-1]
                 func.type = split_line[3]
 
                 if func.type == 'l':
@@ -93,7 +93,7 @@ class Analysis(QtCore.QObject):
                             func.val_type = "struct"
                         self.vallist.append(func)
             elif len(split_line) == 9:
-                func.line = split_line[5]
+                func.line = split_line[5].split(":")[-1]
                 func.type = split_line[4]
                 if func.type == 'm':
                     func.val_type = split_line[7].split(":")[-1]

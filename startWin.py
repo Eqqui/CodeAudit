@@ -76,27 +76,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tabWidget.setCurrentWidget(textEdit)
 
             self.show_result(fileName)
-            # a = Analysis(fileName, self.config_ini)
-            # token_fun, token_val, danger, infun, inval= a.run()
-            # showfunc = BuildTree(self.treeWidget_1, "函数", token_fun)
-            # showfunc.build()
-            #
-            # showval = BuildTree(self.treeWidget_1, "变量", token_val)
-            # showval.build()
-            #
-            # showdan = BuildTree(self.treeWidget, "风险函数", danger)
-            # showdan.build()
-            #
-            # showinfun = BuildTree(self.treeWidget, "无效函数", infun)
-            # showinfun.build()
-            #
-            # showinval = BuildTree(self.treeWidget, "无效变量", inval)
-            # showinval.build()
-            # print(a.filelist)
-            # for f in a.funlist:
-            #     print(f.filepath)
-            # print(a.filename)
-            # print(func)
 
             if isMain:
                 self.model.setRootPath(path)
