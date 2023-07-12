@@ -51,6 +51,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.CMD.triggered.connect(self.terminal)
         self.lineEdit.returnPressed.connect(self.execcmd)
         self.tabWidget.tabCloseRequested.connect(self.close_tab)
+        self.treeWidget_1.itemClicked.connect(self.expand_collapse_item)
+        self.treeWidget.itemClicked.connect(self.expand_collapse_item)
 
     def open_file(self):
         # TODO: file tree and variables
@@ -238,7 +240,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Find.setEnabled(True)
 
     def execcmd(self):
-        # TODO: line edite
         print("run")
         self.tabWidget_2.setCurrentIndex(1)
         cmd = self.lineEdit.text().strip('\r')
@@ -258,19 +259,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget_1.clear()
         a = Analysis(fileName, self.config_ini)
         token_fun, token_val, danger, infun, inval = a.run()
-        showfunc = BuildTree(self.treeWidget_1, "函数", token_fun)
+        showfunc = BuildTree(self.treeWidget_1, "函数", token_fun, ":/img/img/function.png")
         showfunc.build()
 
-        showval = BuildTree(self.treeWidget_1, "变量", token_val)
+        showval = BuildTree(self.treeWidget_1, "变量", token_val, ":/img/img/shuzhi.png")
         showval.build()
 
-        showdan = BuildTree(self.treeWidget, "风险函数", danger)
+        showdan = BuildTree(self.treeWidget, "风险函数", danger, ":/img/img/function.png")
         showdan.build()
 
-        showinfun = BuildTree(self.treeWidget, "无效函数", infun)
+        showinfun = BuildTree(self.treeWidget, "无效函数", infun, ":/img/img/function.png")
         showinfun.build()
 
-        showinval = BuildTree(self.treeWidget, "无效变量", inval)
+        showinval = BuildTree(self.treeWidget, "无效变量", inval, ":/img/img/shuzhi.png")
         showinval.build()
         self.treeWidget.expandAll()
         self.treeWidget_1.expandAll()
+
+    def expand_collapse_item(self, item):
+        if item.isExpanded():
+            item.setExpanded(False)
+        else:
+            item.setExpanded(True)

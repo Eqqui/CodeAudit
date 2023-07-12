@@ -56,17 +56,6 @@ class Ui_MainWindow(object):
         font.setFamily("SimSun")
         font.setPointSize(9)
         self.treeWidget.setFont(font)
-        self.treeWidget.setStyleSheet("QTreeView::branch:closed:has-children\n"
-"{\n"
-"    image: url(./resource/icon/expand-positive.png);/*图标*/\n"
-"    border-image: none;\n"
-"}\n"
-"\n"
-"QTreeView::branch:open:has-children\n"
-"{\n"
-"    image: url(./resource/icon/shrink-positive.png);/*图标*/\n"
-"    border-image: none;\n"
-"}")
         self.treeWidget.setObjectName("treeWidget")
         self.horizontalLayout.addWidget(self.treeWidget)
         self.tabWidget_2.addTab(self.tab, "")
@@ -89,17 +78,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.lineEdit)
         self.tabWidget_2.addTab(self.tab_2, "")
         self.treeWidget_1 = QtWidgets.QTreeWidget(self.splitter_2)
-        self.treeWidget_1.setStyleSheet("QTreeView::branch:closed:has-children\n"
-"{\n"
-"    image: url(./resource/icon/expand-positive.png);/*图标*/\n"
-"    border-image: none;\n"
-"}\n"
-"\n"
-"QTreeView::branch:open:has-children\n"
-"{\n"
-"    image: url(./resource/icon/shrink-positive.png);/*图标*/\n"
-"    border-image: none;\n"
-"}")
         self.treeWidget_1.setObjectName("treeWidget_1")
         self.treeWidget_1.header().setDefaultSectionSize(110)
         self.treeWidget_1.header().setHighlightSections(False)
@@ -284,7 +262,8 @@ class Ui_MainWindow(object):
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab), _translate("MainWindow", "输出"))
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_2), _translate("MainWindow", "终端"))
         self.treeWidget_1.headerItem().setText(0, _translate("MainWindow", "函数和变量"))
-        self.treeWidget_1.headerItem().setText(1, _translate("MainWindow", "类型"))
+        self.treeWidget_1.headerItem().setText(1, _translate("MainWindow", "行"))
+        self.treeWidget_1.headerItem().setText(2, _translate("MainWindow", "类型"))
         self.File.setTitle(_translate("MainWindow", "文件"))
         self.Edit.setTitle(_translate("MainWindow", "编辑"))
         self.Window.setTitle(_translate("MainWindow", "窗口"))
