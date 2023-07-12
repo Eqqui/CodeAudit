@@ -28,4 +28,3 @@ class BuildTree():
                     print(item)
                     child.setText(itemindex, item)
                     itemindex = itemindex + 1
-        tree.setExpanded(True)

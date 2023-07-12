@@ -272,3 +272,5 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         showinval = BuildTree(self.treeWidget, "无效变量", inval)
         showinval.build()
+        self.treeWidget.expandAll()
+        self.treeWidget_1.expandAll()
