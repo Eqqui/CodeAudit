@@ -30,6 +30,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.splitter.setSizes([200, 10])
         self.config = Config()
         self.config_ini = self.config.read_config()
+        self.token_fun = []
+        self.token_val = []
+        self.danger = []
+        self.infun = []
+        self.inval = []
 
     def slot(self):
         # 槽函数
@@ -39,7 +44,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Save.triggered.connect(self.save_file)
         self.Saveas.triggered.connect(self.saveas_file)
         self.Close.triggered.connect(self.close_tab)
-        self.Closeall.triggered.connect(self.clase_all_tab)
+        self.Closeall.triggered.connect(self.close_all_tab)
         self.Exit.triggered.connect(self.closeEvent)
         self.Undo.triggered.connect(self.unDo)
         self.Copy.triggered.connect(self.copy)
@@ -53,6 +58,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tabWidget.tabCloseRequested.connect(self.close_tab)
         self.treeWidget_1.itemClicked.connect(self.expand_collapse_item)
         self.treeWidget.itemClicked.connect(self.expand_collapse_item)
+        self.treeView.doubleClicked.connect(self.tree_file)
 
     def open_file(self):
         # TODO: file tree and variables
@@ -60,7 +66,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget.clear()
         isMain = True
         self.treeWidget_1.clear()
-        self.clase_all_tab()
+        self.close_all_tab()
         # self.fileCloseAll()
         # self.treeView
         fileName, isOk = QFileDialog.getOpenFileName(self, "选取文件", "./", "C(*.c)")
@@ -75,7 +81,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tabWidget.addTab(textEdit, textEdit.get_name())
             self.tabWidget.setCurrentWidget(textEdit)
 
-            self.show_result(fileName)
+            self.show_result(fileName, 1)
 
             if isMain:
                 self.model.setRootPath(path)
@@ -99,7 +105,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             f.write(textEdit.text().replace("\r", ''))
             f.close()
             textEdit.modified = False
-            self.show_result(filename)
+            self.show_result(filename, 1)
             return True
         except EnvironmentError as e:
             print(e)
@@ -142,7 +148,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.tabWidget.count() == 0:
             self.nothing_open.emit()
 
-    def clase_all_tab(self):
+    def close_all_tab(self):
         failures = []
         for i in range(self.tabWidget.count()):
             self.close_tab()
@@ -150,11 +156,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                              "Failed to save{0}\nQuit anyway?".format("\n\t".join(failures)),
                                              QMessageBox.Yes | QMessageBox.No) == QMessageBox.No):
             return False
+        self.treeWidget.clear()
+        self.treeWidget_1.clear()
+        self.treeView.setModel(None)
         return True
 
     # overwrite
     def closeEvent(self, event) -> None:
-        if (self.clase_all_tab() is False) or self.is_open_something():
+        if (self.close_all_tab() is False) or self.is_open_something():
             event.ignore()
             return
         else:
@@ -233,26 +242,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.textEdit_2.append(stdout.decode("gbk"))
         self.textEdit_2.append(stderr.decode("gbk"))
 
-    def show_result(self, fileName):
-        self.treeWidget.clear()
-        self.treeWidget_1.clear()
+    def show_result(self, fileName, flag):
+
         a = Analysis(fileName, self.config_ini)
-        token_fun, token_val, danger, infun, inval = a.run()
-        showfunc = BuildTree(self.treeWidget_1, "函数", token_fun, ":/img/img/function.png")
+        self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
+        if flag == 1:
+            self.treeWidget.clear()
+            # a = Analysis(fileName, self.config_ini)
+            # self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
+            showdan = BuildTree(self.treeWidget, "风险函数", self.danger, ":/img/img/function.png")
+            showdan.build()
+
+            showinfun = BuildTree(self.treeWidget, "无效函数", self.infun, ":/img/img/function.png")
+            showinfun.build()
+
+            showinval = BuildTree(self.treeWidget, "无效变量", self.inval, ":/img/img/shuzhi.png")
+            showinval.build()
+            self.treeWidget.expandAll()
+
+        self.treeWidget_1.clear()
+        showfunc = BuildTree(self.treeWidget_1, "函数", self.token_fun, ":/img/img/function.png")
         showfunc.build()
 
-        showval = BuildTree(self.treeWidget_1, "变量", token_val, ":/img/img/shuzhi.png")
+        showval = BuildTree(self.treeWidget_1, "变量", self.token_val, ":/img/img/shuzhi.png")
         showval.build()
 
-        showdan = BuildTree(self.treeWidget, "风险函数", danger, ":/img/img/function.png")
-        showdan.build()
-
-        showinfun = BuildTree(self.treeWidget, "无效函数", infun, ":/img/img/function.png")
-        showinfun.build()
-
-        showinval = BuildTree(self.treeWidget, "无效变量", inval, ":/img/img/shuzhi.png")
-        showinval.build()
-        self.treeWidget.expandAll()
         self.treeWidget_1.expandAll()
 
     def expand_collapse_item(self, item):
@@ -260,3 +274,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             item.setExpanded(False)
         else:
             item.setExpanded(True)
+
+    def tree_file(self):
+        filename = self.model.filePath(self.treeView.currentIndex())
+        self.file_display(filename)
+
+    def file_display(self, filename):
+        path, name = split_pathname(filename)
+        for i in range(self.tabWidget.count()):
+            textEdit = self.tabWidget.widget(i)
+            if textEdit.get_path() + '/' + textEdit.get_name() == filename:
+                self.tabWidget.setCurrentWidget(textEdit)
+                self.show_result(filename, 0)
+                return
+        else:
+            f = open(filename, "r")
+            text = f.read()
+            f.close()
+            textEdit = TextArea(name, text, path)
+            self.tabWidget.addTab(textEdit, textEdit.get_name())
+            self.tabWidget.setCurrentWidget(textEdit)
+            self.show_result(filename, 0)
+            self.new_tab.emit()
