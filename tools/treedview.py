@@ -22,15 +22,15 @@ class BuildTree():
             itemindex = 0
             for item in row:
                 if isinstance(item, list) and item !=[]:
-                    cc = QTreeWidgetItem(child)
-                    for val in item:
+                    for h in item:
+                        cc = QTreeWidgetItem(child)
                         valindex = 0
-                        for i in val:
-                            cc.setText(valindex, i)
+                        for val in h:
+                            cc.setText(valindex, val)
                             valindex = valindex+1
                 elif not item:
                     continue
                 else:
-                    print(item)
+                    # print(item)
                     child.setText(itemindex, item)
                     itemindex = itemindex + 1

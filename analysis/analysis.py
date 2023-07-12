@@ -54,7 +54,6 @@ class Analysis(QtCore.QObject):
         self.gen_token()
         self.gen_danger()
         self.gen_invalid()
-
         return self.token_func, self.token_val, self.danger, self.invalid_func, self.invalid_val
 
     def get_function(self):
@@ -77,7 +76,7 @@ class Analysis(QtCore.QObject):
             split_line = line.split('\t')
             func = Function(name=split_line[0], filepath=split_line[1])
             if len(split_line) == 8 or len(split_line) == 6:
-                func.line = split_line[4].split(":")[-1]
+                func.line = split_line[4]
                 func.type = split_line[3]
 
                 if func.type == 'l':
@@ -93,7 +92,7 @@ class Analysis(QtCore.QObject):
                             func.val_type = "struct"
                         self.vallist.append(func)
             elif len(split_line) == 9:
-                func.line = split_line[5].split(":")[-1]
+                func.line = split_line[5]
                 func.type = split_line[4]
                 if func.type == 'm':
                     func.val_type = split_line[7].split(":")[-1]
@@ -117,7 +116,7 @@ class Analysis(QtCore.QObject):
         list = []
         files = os.listdir(path)
         for file in files:
-            if re.match("(\w*)\.c$", file) is not None:
+            if re.match("(\w*)\.c", file) is not None:
                 f = path + '/' + file
                 if not os.path.isdir(f):
                     list.append(f)
@@ -134,6 +133,8 @@ class Analysis(QtCore.QObject):
                 self.token_func.append(f)
 
         for val in self.vallist:
+            if val.type != 's' and val.type != 'v':
+                continue
             if val.filepath == self.filename:
                 v = [val.name, val.line, val.val_type, []]
                 if val.list:
@@ -158,7 +159,7 @@ class Analysis(QtCore.QObject):
                     for ss in s:
                         if re.search(pattern, ss) is not None:
                             line = s.index(ss)+1
-                            d = [file, str(line), row[0], row[1], row[2]]
+                            d = [file, "line:"+str(line), row[0], row[1], row[2]]
                             self.danger.append(d)
         except Exception as e:
             print(e)
@@ -168,7 +169,7 @@ class Analysis(QtCore.QObject):
         for f in self.funlist:
             if f.name =='main':
                 main = f
-                break
+                # break
         self.validfun.append(main)
         self.find_valid(main, [])
         for f in list(set(self.funlist) - set(self.validfun)):
