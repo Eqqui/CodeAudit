@@ -149,7 +149,7 @@ class Analysis(QtCore.QObject):
             # results = cursor.fetchall()
             for row in cursor:
                 # self.table_add(row[0], row[1], row[2])
-                print(row)
+                # print(row)
                 for file in self.filelist:
                     f = open(file, 'r')
                     s = f.readlines()
@@ -165,11 +165,23 @@ class Analysis(QtCore.QObject):
             db.rollback()  # 回滚事务
 
     def gen_invalid(self):
-        # TODO: gen_invalid
-        pass
+        for f in self.funlist:
+            if f.name =='main':
+                main = f
+                break
+        self.validfun.append(main)
+        self.find_valid(main, [])
+        for f in list(set(self.funlist) - set(self.validfun)):
+            ff = [f.filepath, f.line, f.name]
+            self.invalid_func.append(ff)
+
+        for v in list(set(self.vallist) - set(self.validval)):
+            vv = [v.filepath, v.line, v.name]
+            self.invalid_val.append(vv)
 
     def find_valid(self, fun, l):
         code = self.scanner(fun.filepath)
+        print(code)
         flag = 0
         first = True
         l.append(fun)
@@ -239,11 +251,12 @@ class Analysis(QtCore.QObject):
 if __name__ == '__main__':
     con = Config()
     ini = con.read_config()
-    a = Analysis("D:/AAtestplaceforcode/code_aduit/test.c", ini)
+    a = Analysis("D:/AAtestplaceforcode/code_aduit/", ini)
     func, val, d, vf, vv = a.run()
-    print(a.filelist)
-    for f in a.funlist:
-        print(f.filepath)
-    print(a.filename)
-    print(d)
+    # print(a.filelist)
+    # for f in a.funlist:
+    #     print(f.list[0].name)
+    # print(a.filename)
+    # print(d)
     # a.gen_report()
+    # print(vv)

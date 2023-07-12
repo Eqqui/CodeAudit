@@ -11,6 +11,7 @@ from find.find import FindForm
 from function.function import functionForm
 from config.config import Config
 from analysis.analysis import Analysis
+from tools.treedview import BuildTree
 from ui.functionWidget import Ui_functionDialog
 
 
@@ -57,6 +58,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget.clear()
         isMain = True
         self.treeWidget_1.clear()
+        self.clase_all_tab()
         # self.fileCloseAll()
         # self.treeView
         fileName, isOk = QFileDialog.getOpenFileName(self, "选取文件", "./", "C(*.c)")
@@ -70,19 +72,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             textEdit.setAutoFillBackground(True)
             self.tabWidget.addTab(textEdit, textEdit.get_name())
             self.tabWidget.setCurrentWidget(textEdit)
-            a = Analysis(fileName, self.config_ini)
-            func = a.run()
-            print(a.filelist)
-            for f in a.funlist:
-                print(f.filepath)
-            print(a.filename)
-            print(func)
+
+            self.show_result(fileName)
+            # a = Analysis(fileName, self.config_ini)
+            # token_fun, token_val, danger, infun, inval= a.run()
+            # showfunc = BuildTree(self.treeWidget_1, "函数", token_fun)
+            # showfunc.build()
+            #
+            # showval = BuildTree(self.treeWidget_1, "变量", token_val)
+            # showval.build()
+            #
+            # showdan = BuildTree(self.treeWidget, "风险函数", danger)
+            # showdan.build()
+            #
+            # showinfun = BuildTree(self.treeWidget, "无效函数", infun)
+            # showinfun.build()
+            #
+            # showinval = BuildTree(self.treeWidget, "无效变量", inval)
+            # showinval.build()
+            # print(a.filelist)
+            # for f in a.funlist:
+            #     print(f.filepath)
+            # print(a.filename)
+            # print(func)
 
             if isMain:
                 self.model.setRootPath(path)
                 self.model.setNameFilterDisables(False)
                 self.model.setNameFilters(["*.c", "*.h"])
-
                 self.treeView.setModel(self.model)
                 self.treeView.setColumnHidden(1, True)
                 self.treeView.setColumnHidden(2, True)
@@ -101,6 +118,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             f.write(textEdit.text().replace("\r", ''))
             f.close()
             textEdit.modified = False
+            self.show_result(filename)
             return True
         except EnvironmentError as e:
             print(e)
@@ -234,3 +252,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print(stdout.decode("gbk"))
         self.textEdit_2.append(stdout.decode("gbk"))
         self.textEdit_2.append(stderr.decode("gbk"))
+
+    def show_result(self, fileName):
+        self.treeWidget.clear()
+        self.treeWidget_1.clear()
+        a = Analysis(fileName, self.config_ini)
+        token_fun, token_val, danger, infun, inval = a.run()
+        showfunc = BuildTree(self.treeWidget_1, "函数", token_fun)
+        showfunc.build()
+
+        showval = BuildTree(self.treeWidget_1, "变量", token_val)
+        showval.build()
+
+        showdan = BuildTree(self.treeWidget, "风险函数", danger)
+        showdan.build()
+
+        showinfun = BuildTree(self.treeWidget, "无效函数", infun)
+        showinfun.build()
+
+        showinval = BuildTree(self.treeWidget, "无效变量", inval)
+        showinval.build()
