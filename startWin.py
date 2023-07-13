@@ -209,6 +209,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget.clear()
         self.treeWidget_1.clear()
         self.treeView.setModel(None)
+        self.isMain = False
 
         self.Save.setEnabled(False)
         self.Saveas.setEnabled(False)
