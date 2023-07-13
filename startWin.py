@@ -146,6 +146,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.tabWidget.removeTab(self.tabWidget.currentIndex())
 
         if self.tabWidget.count() == 0:
+            self.treeWidget.clear()
+            self.treeWidget_1.clear()
+            self.treeView.setModel(None)
             self.nothing_open.emit()
 
     def close_all_tab(self):
@@ -244,27 +247,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def show_result(self, fileName, flag):
 
-        a = Analysis(fileName, self.config_ini)
-        self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
+        # a = Analysis(fileName, self.config_ini)
+        # self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
         if flag == 1:
             self.treeWidget.clear()
-            # a = Analysis(fileName, self.config_ini)
-            # self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
-            showdan = BuildTree(self.treeWidget, "风险函数", self.danger, ":/img/img/function.png")
+            a = Analysis(fileName, self.config_ini)
+            self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
+            showdan = BuildTree(self.treeWidget, "风险函数", self.danger, False, ":/img/img/function.png")
             showdan.build()
 
-            showinfun = BuildTree(self.treeWidget, "无效函数", self.infun, ":/img/img/function.png")
+            showinfun = BuildTree(self.treeWidget, "无效函数", self.infun, False, ":/img/img/function.png")
             showinfun.build()
 
-            showinval = BuildTree(self.treeWidget, "无效变量", self.inval, ":/img/img/shuzhi.png")
+            showinval = BuildTree(self.treeWidget, "无效变量", self.inval, False, ":/img/img/shuzhi.png")
             showinval.build()
             self.treeWidget.expandAll()
 
         self.treeWidget_1.clear()
-        showfunc = BuildTree(self.treeWidget_1, "函数", self.token_fun, ":/img/img/function.png")
+        show_func = [func for func in self.token_fun if func[0] == fileName]
+        show_val = [val for val in self.token_val if val[0] == fileName]
+        # print(show_func)
+        showfunc = BuildTree(self.treeWidget_1, "函数", show_func, True,  ":/img/img/function.png")
         showfunc.build()
 
-        showval = BuildTree(self.treeWidget_1, "变量", self.token_val, ":/img/img/shuzhi.png")
+        showval = BuildTree(self.treeWidget_1, "变量", show_val, True, ":/img/img/shuzhi.png")
         showval.build()
 
         self.treeWidget_1.expandAll()
