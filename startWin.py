@@ -12,7 +12,6 @@ from function.function import functionForm
 from config.config import Config
 from analysis.analysis import Analysis
 from tools.treedview import BuildTree
-from ui.functionWidget import Ui_functionDialog
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -26,6 +25,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.nothing_open.emit()
         self.model = QFileSystemModel()
         # 初始化
+        self.isMain = False
         self.splitter_2.setSizes([20, 250, 20])
         self.splitter.setSizes([200, 10])
         self.config = Config()
@@ -59,31 +59,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget_1.itemClicked.connect(self.expand_collapse_item)
         self.treeWidget.itemClicked.connect(self.expand_collapse_item)
         self.treeView.doubleClicked.connect(self.tree_file)
+        self.tabWidget.currentChanged.connect(self.tab_switch_handle)
 
     def open_file(self):
         # TODO: file tree and variables
         print("open")
         self.treeWidget.clear()
-        isMain = True
         self.treeWidget_1.clear()
         self.close_all_tab()
-        # self.fileCloseAll()
-        # self.treeView
         fileName, isOk = QFileDialog.getOpenFileName(self, "选取文件", "./", "C(*.c)")
         path, name = split_pathname(fileName)
 
         if isOk:
-            f = open(fileName, "r")
-            text = f.read()
-            f.close()
-            textEdit = TextArea(name, text, path)
-            textEdit.setAutoFillBackground(True)
-            self.tabWidget.addTab(textEdit, textEdit.get_name())
-            self.tabWidget.setCurrentWidget(textEdit)
+            print(fileName)
+            self.have_main(fileName)
+            print(self.isMain)
 
-            self.show_result(fileName, 1)
+            if self.isMain:
+                f = open(fileName, "r")
+                text = f.read()
+                f.close()
+                textEdit = TextArea(name, text, path)
+                textEdit.setAutoFillBackground(True)
+                self.tabWidget.addTab(textEdit, textEdit.get_name())
+                self.tabWidget.setCurrentWidget(textEdit)
+                self.show_result(fileName, 1)
 
-            if isMain:
                 self.model.setRootPath(path)
                 self.model.setNameFilterDisables(False)
                 self.model.setNameFilters(["*.c", "*.h"])
@@ -92,7 +93,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.treeView.setColumnHidden(2, True)
                 self.treeView.setColumnHidden(3, True)
                 self.treeView.setRootIndex(self.model.index(path))
-            self.new_tab.emit()
+                self.new_tab.emit()
+            else:
+                QMessageBox.warning(self, "警告", "文件没有main函数")
 
     def save_file(self):
         textEdit = self.tabWidget.currentWidget()
@@ -146,9 +149,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.tabWidget.removeTab(self.tabWidget.currentIndex())
 
         if self.tabWidget.count() == 0:
-            self.treeWidget.clear()
-            self.treeWidget_1.clear()
-            self.treeView.setModel(None)
             self.nothing_open.emit()
 
     def close_all_tab(self):
@@ -159,9 +159,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                              "Failed to save{0}\nQuit anyway?".format("\n\t".join(failures)),
                                              QMessageBox.Yes | QMessageBox.No) == QMessageBox.No):
             return False
-        self.treeWidget.clear()
-        self.treeWidget_1.clear()
-        self.treeView.setModel(None)
         return True
 
     # overwrite
@@ -207,6 +204,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         subprocess.Popen(["cmd",'/c','cmd'],creationflags =subprocess.CREATE_NEW_CONSOLE)
 
     def disable_eidting(self):
+        self.treeWidget.clear()
+        self.treeWidget_1.clear()
+        self.treeView.setModel(None)
+
         self.Save.setEnabled(False)
         self.Saveas.setEnabled(False)
         self.Close.setEnabled(False)
@@ -302,3 +303,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tabWidget.setCurrentWidget(textEdit)
             self.show_result(filename, 0)
             self.new_tab.emit()
+
+    def tab_switch_handle(self, index):
+        if index == -1:
+            self.nothing_open.emit()
+            return
+        textEdit = self.tabWidget.widget(index)
+        fileName = textEdit.get_path() + "/"+textEdit.get_name()
+        print(fileName)
+        self.show_result(fileName, 0)
+
+    def have_main(self, filepath):
+        f = open(self.config_ini['main_project']['project_path']+ self.config_ini['result']['demo'], "w")
+        text = "0$" + filepath + "$\n"
+        f.write(text)
+        f.close()
+        os.system(self.config_ini['main_project']['project_path']+self.config_ini['scanner']['lex']+" < " + filepath)
+        f = open(self.config_ini['main_project']['project_path']+ self.config_ini['result']['demo'], "r")
+        list = f.readlines()
+        code = []
+        for s in list:
+            s.rstrip()
+            str = s.split("$")
+            result = [x.strip() for x in str if x.strip() != '']
+            code.append(result)
+        for s in code:
+            if 'main' in s:
+                i = s.index('main')
+                if s[i+1] == '(':
+                    self.isMain = True
+                    break

@@ -162,7 +162,8 @@ class Analysis(QtCore.QObject):
                     f = open(file, 'r')
                     s = f.readlines()
                     f.close()
-                    pattern = re.compile("\W"+row[0]+"[(]")
+                    # pattern = re.compile("\W"+row[0]+"[(]")
+                    pattern = re.compile("\s+" + row[0] + "\s*\(")
                     for ss in s:
                         if re.search(pattern, ss) is not None:
                             line = s.index(ss)+1
