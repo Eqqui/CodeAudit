@@ -1,8 +1,10 @@
 import os
+import re
 import subprocess
 
 from PyQt5.Qsci import QsciScintilla
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QFileSystemModel
 from ui.startWidget import Ui_MainWindow
 from os.path import split as split_pathname
@@ -60,10 +62,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget.itemClicked.connect(self.expand_collapse_item)
         self.treeView.doubleClicked.connect(self.tree_file)
         self.tabWidget.currentChanged.connect(self.tab_switch_handle)
+        self.treeWidget_1.itemDoubleClicked.connect(self.treeclick_handle)
+        self.treeWidget.itemDoubleClicked.connect(self.treeclick_handle)
 
     def open_file(self):
-        # TODO: file tree and variables
-        print("open")
         self.treeWidget.clear()
         self.treeWidget_1.clear()
         self.close_all_tab()
@@ -333,3 +335,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if s[i+1] == '(':
                     self.isMain = True
                     break
+
+    def treeclick_handle(self, item, colum):
+        text = item.text(0)
+        if re.match("^[a-zA-Z]:/", text):
+            self.file_display(text)
+        line = item.text(1).split(":")[-1]
+        if line:
+            line = int(line)
+            textEdit = self.tabWidget.currentWidget()
+            textEdit.setSelection(line, 0, line-1, 0)
