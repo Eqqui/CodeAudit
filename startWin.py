@@ -2,10 +2,11 @@ import os
 import re
 import subprocess
 
+from PyQt5 import QtGui
 from PyQt5.Qsci import QsciScintilla
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QEvent
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QFileSystemModel
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QFileSystemModel, QAction, QMenu
 from ui.startWidget import Ui_MainWindow
 from os.path import split as split_pathname
 from tools.text_area import TextArea
@@ -73,7 +74,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         path, name = split_pathname(fileName)
 
         if isOk:
-            print(fileName)
+            # print(fileName)
             self.have_main(fileName)
             print(self.isMain)
 
@@ -81,7 +82,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 f = open(fileName, "r")
                 text = f.read()
                 f.close()
-                textEdit = TextArea(name, text, path)
+                textEdit = TextArea(name, text, path, self)
                 textEdit.setAutoFillBackground(True)
                 self.tabWidget.addTab(textEdit, textEdit.get_name())
                 self.tabWidget.setCurrentWidget(textEdit)
@@ -301,7 +302,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             f = open(filename, "r")
             text = f.read()
             f.close()
-            textEdit = TextArea(name, text, path)
+            textEdit = TextArea(name, text, path, self)
             self.tabWidget.addTab(textEdit, textEdit.get_name())
             self.tabWidget.setCurrentWidget(textEdit)
             self.show_result(filename, 0)
@@ -313,7 +314,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
         textEdit = self.tabWidget.widget(index)
         fileName = textEdit.get_path() + "/"+textEdit.get_name()
-        print(fileName)
+        # print(fileName)
         self.show_result(fileName, 0)
 
     def have_main(self, filepath):
@@ -346,3 +347,4 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             line = int(line)
             textEdit = self.tabWidget.currentWidget()
             textEdit.setSelection(line, 0, line-1, 0)
+

@@ -257,15 +257,8 @@ class Analysis(QtCore.QObject):
         return m.group(0)
 
 
-if __name__ == '__main__':
-    con = Config()
-    ini = con.read_config()
-    a = Analysis("D:/AAtestplaceforcode/code_aduit/", ini)
-    func, val, d, vf, vv = a.run()
-    # print(a.filelist)
-    # for f in a.funlist:
-    #     print(f.list[0].name)
-    # print(a.filename)
-    # print(d)
-    # a.gen_report()
-    # print(vv)
+# if __name__ == '__main__':
+#     con = Config()
+#     ini = con.read_config()
+#     a = Analysis("D:/AAtestplaceforcode/code_aduit/", ini)
+#     func, val, d, vf, vv = a.run()

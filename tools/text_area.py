@@ -106,7 +106,8 @@ class TextArea(QsciScintilla):
     def __init__(self,
                  name: str = "Untilted",
                  data: str = "",
-                 path: str = None):
+                 path: str = None,
+                 parent = None,):
         super().__init__()
         self.super = super()
         self.__path = path
@@ -119,6 +120,7 @@ class TextArea(QsciScintilla):
         self.doc = QsciDocument()
         self.modified = False
         self.textChanged.connect(self.text_modified)
+        self.parent = parent
 
     def get_name(self):
         return self.__name
@@ -234,5 +236,60 @@ class TextArea(QsciScintilla):
         ori = self.createStandardContextMenu()
         go_defi = QAction("go to the definition")
         ori.addAction(go_defi)
+        go_defi.triggered.connect(self.go_to_definition)
+
+        if not self.hasSelectedText():
+            go_defi.setEnabled(False)
         # 显示右键菜单
         ori.exec_(event.globalPos())
+
+    def go_to_definition(self):
+        str = self.selectedText()
+        func_name = [row[1] for row in self.parent.token_fun]
+        val_name = [row[1] for row in self.parent.token_val]
+        if str in val_name:
+            index = val_name.index(str)
+            filename = self.parent.token_val[index][0]
+            current_file = self.get_path()+ "/" + self.get_name()
+            print()
+            print(filename)
+            print(current_file)
+            if current_file!= filename:
+                self.parent.file_display(filename)
+                line = int(self.parent.token_val[index][2].split(":")[-1])
+                text = self.parent.tabWidget.currentWidget()
+                text.setSelection(line, 0, line-1, 0)
+            else:
+                line = int(self.parent.token_val[index][2].split(":")[-1])
+                self.setSelection(line, 0, line - 1, 0)
+
+        if str in func_name:
+            index = func_name.index(str)
+            filename = self.parent.token_fun[index][0]
+            current_file = self.get_path()+ "/" + self.get_name()
+            print()
+            print(filename)
+            print(current_file)
+            if current_file != filename:
+                self.parent.file_display(filename)
+                line = int(self.parent.token_fun[index][2].split(":")[-1])
+                text = self.parent.tabWidget.currentWidget()
+                text.setSelection(line, 0, line-1, 0)
+            else:
+                line = int(self.parent.token_fun[index][2].split(":")[-1])
+                self.setSelection(line, 0, line - 1, 0)
+
+        for item in self.parent.token_fun:
+            if item[-1]:
+                filename = item[0]
+                current_file = self.get_path()+ "/" + self.get_name()
+                for val in item[-1]:
+                    if str == val[0]:
+                        line = int(val[1].split(":")[-1])
+                        if current_file!= filename:
+                            self.parent.file_display(filename)
+                            text = self.parent.tabWidget.currentWidget()
+                            text.setSelection(line, 0, line-1, 0)
+                        else:
+                            self.setSelection(line, 0, line - 1, 0)
+                        break
