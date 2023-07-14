@@ -13,17 +13,18 @@ from config.config import Config
 class DB():
     def __init__(self,filepath):
         self.key=filepath
-        self.conn = pymysql.connect(
-            host="localhost",
-            port=3306,
-            user='root',
-            password='111111',
-            charset='utf8mb4',
-            database='code_audit'
-        )
-        self.cursor = self.conn.cursor()
         self.config=Config()
         self.config_ini=self.config.read_config()
+        self.conn = pymysql.connect(
+            host="localhost",
+            port=int(self.config_ini['db_set']['port']),
+            user=self.config_ini['db_set']['user_name'],
+            password=self.config_ini['db_set']['password'],
+            charset='utf8mb4',
+            database=self.config_ini['db_set']['database_name']
+        )
+        self.cursor = self.conn.cursor()
+
 
     def get_key(self):
         kdf = PBKDF2HMAC(

@@ -101,10 +101,12 @@ class logWin(QWidget, Ui_loginForm):
             print("数据库已存在，连接到数据库")
             self.db.close()
             self.db = pymysql.connect(
-                host='localhost',  # MySQL服务器地址
-                user='root',  # 用户名
-                password='',  # 密码
-                database=self.database_name
+                host="localhost",
+                port=int(self.config_ini['db_set']['port']),
+                user=self.config_ini['db_set']['user_name'],
+                password=self.config_ini['db_set']['password'],
+                charset='utf8mb4',
+                database=self.config_ini['db_set']['database_name']
             )
             self.cursor = self.db.cursor()
             pass
@@ -116,10 +118,12 @@ class logWin(QWidget, Ui_loginForm):
             self.db.commit()
             # self.db.close()
             self.db = pymysql.connect(
-                host='localhost',  # MySQL服务器地址
-                user='root',  # 用户名
-                password='',  # 密码
-                database=self.database_name
+                host="localhost",
+                port=int(self.config_ini['db_set']['port']),
+                user=self.config_ini['db_set']['user_name'],
+                password=self.config_ini['db_set']['password'],
+                charset='utf8mb4',
+                database=self.config_ini['db_set']['database_name']
             )
             self.cursor = self.db.cursor()
             self.creat_table()
