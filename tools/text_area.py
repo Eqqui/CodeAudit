@@ -1,3 +1,4 @@
+from PyQt5 import QtGui
 from PyQt5.Qsci import QsciScintilla, \
     QsciLexerMakefile,\
     QsciLexerBash, \
@@ -24,6 +25,8 @@ from PyQt5.Qsci import QsciScintilla, \
     QsciLexerXML, \
     QsciLexerYAML,QsciDocument
 from PyQt5.QtGui import QFont, QColor
+from PyQt5.QtWidgets import QMenu, QAction
+
 from config.settings import Settings as S
 
 
@@ -105,7 +108,7 @@ class TextArea(QsciScintilla):
                  data: str = "",
                  path: str = None):
         super().__init__()
-
+        self.super = super()
         self.__path = path
         self.__name = name
         self.setText(data)
@@ -226,3 +229,10 @@ class TextArea(QsciScintilla):
     def clear_highlight(self):
         self.SendScintilla(QsciScintilla.SCI_STARTSTYLING, 0, 0x1f)
         self.SendScintilla(QsciScintilla.SCI_SETSTYLING, self.length(), 0)
+
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        ori = self.createStandardContextMenu()
+        go_defi = QAction("go to the definition")
+        ori.addAction(go_defi)
+        # 显示右键菜单
+        ori.exec_(event.globalPos())

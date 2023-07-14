@@ -1,8 +1,10 @@
 import os
+import re
 import subprocess
 
 from PyQt5.Qsci import QsciScintilla
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QFileSystemModel
 from ui.startWidget import Ui_MainWindow
 from os.path import split as split_pathname
@@ -12,7 +14,6 @@ from function.function import functionForm
 from config.config import Config
 from analysis.analysis import Analysis
 from tools.treedview import BuildTree
-from ui.functionWidget import Ui_functionDialog
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -26,6 +27,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.nothing_open.emit()
         self.model = QFileSystemModel()
         # 初始化
+        self.isMain = False
         self.splitter_2.setSizes([20, 250, 20])
         self.splitter.setSizes([200, 10])
         self.config = Config()
@@ -59,31 +61,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget_1.itemClicked.connect(self.expand_collapse_item)
         self.treeWidget.itemClicked.connect(self.expand_collapse_item)
         self.treeView.doubleClicked.connect(self.tree_file)
+        self.tabWidget.currentChanged.connect(self.tab_switch_handle)
+        self.treeWidget_1.itemDoubleClicked.connect(self.treeclick_handle)
+        self.treeWidget.itemDoubleClicked.connect(self.treeclick_handle)
 
     def open_file(self):
-        # TODO: file tree and variables
-        print("open")
         self.treeWidget.clear()
-        isMain = True
         self.treeWidget_1.clear()
         self.close_all_tab()
-        # self.fileCloseAll()
-        # self.treeView
         fileName, isOk = QFileDialog.getOpenFileName(self, "选取文件", "./", "C(*.c)")
         path, name = split_pathname(fileName)
 
         if isOk:
-            f = open(fileName, "r")
-            text = f.read()
-            f.close()
-            textEdit = TextArea(name, text, path)
-            textEdit.setAutoFillBackground(True)
-            self.tabWidget.addTab(textEdit, textEdit.get_name())
-            self.tabWidget.setCurrentWidget(textEdit)
+            print(fileName)
+            self.have_main(fileName)
+            print(self.isMain)
 
-            self.show_result(fileName, 1)
+            if self.isMain:
+                f = open(fileName, "r")
+                text = f.read()
+                f.close()
+                textEdit = TextArea(name, text, path)
+                textEdit.setAutoFillBackground(True)
+                self.tabWidget.addTab(textEdit, textEdit.get_name())
+                self.tabWidget.setCurrentWidget(textEdit)
+                self.show_result(fileName, 1)
 
-            if isMain:
                 self.model.setRootPath(path)
                 self.model.setNameFilterDisables(False)
                 self.model.setNameFilters(["*.c", "*.h"])
@@ -92,7 +95,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.treeView.setColumnHidden(2, True)
                 self.treeView.setColumnHidden(3, True)
                 self.treeView.setRootIndex(self.model.index(path))
-            self.new_tab.emit()
+                self.new_tab.emit()
+            else:
+                QMessageBox.warning(self, "警告", "文件没有main函数")
 
     def save_file(self):
         textEdit = self.tabWidget.currentWidget()
@@ -156,9 +161,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                              "Failed to save{0}\nQuit anyway?".format("\n\t".join(failures)),
                                              QMessageBox.Yes | QMessageBox.No) == QMessageBox.No):
             return False
-        self.treeWidget.clear()
-        self.treeWidget_1.clear()
-        self.treeView.setModel(None)
         return True
 
     # overwrite
@@ -204,6 +206,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         subprocess.Popen(["cmd",'/c','cmd'],creationflags =subprocess.CREATE_NEW_CONSOLE)
 
     def disable_eidting(self):
+        self.treeWidget.clear()
+        self.treeWidget_1.clear()
+        self.treeView.setModel(None)
+        self.isMain = False
+
         self.Save.setEnabled(False)
         self.Saveas.setEnabled(False)
         self.Close.setEnabled(False)
@@ -244,27 +251,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def show_result(self, fileName, flag):
 
-        a = Analysis(fileName, self.config_ini)
-        self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
+        # a = Analysis(fileName, self.config_ini)
+        # self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
         if flag == 1:
             self.treeWidget.clear()
-            # a = Analysis(fileName, self.config_ini)
-            # self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
-            showdan = BuildTree(self.treeWidget, "风险函数", self.danger, ":/img/img/function.png")
+            a = Analysis(fileName, self.config_ini)
+            self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
+            showdan = BuildTree(self.treeWidget, "风险函数", self.danger, False, ":/img/img/function.png")
             showdan.build()
 
-            showinfun = BuildTree(self.treeWidget, "无效函数", self.infun, ":/img/img/function.png")
+            showinfun = BuildTree(self.treeWidget, "无效函数", self.infun, False, ":/img/img/function.png")
             showinfun.build()
 
-            showinval = BuildTree(self.treeWidget, "无效变量", self.inval, ":/img/img/shuzhi.png")
+            showinval = BuildTree(self.treeWidget, "无效变量", self.inval, False, ":/img/img/shuzhi.png")
             showinval.build()
             self.treeWidget.expandAll()
 
         self.treeWidget_1.clear()
-        showfunc = BuildTree(self.treeWidget_1, "函数", self.token_fun, ":/img/img/function.png")
+        show_func = [func for func in self.token_fun if func[0] == fileName]
+        show_val = [val for val in self.token_val if val[0] == fileName]
+        # print(show_func)
+        showfunc = BuildTree(self.treeWidget_1, "函数", show_func, True,  ":/img/img/function.png")
         showfunc.build()
 
-        showval = BuildTree(self.treeWidget_1, "变量", self.token_val, ":/img/img/shuzhi.png")
+        showval = BuildTree(self.treeWidget_1, "变量", show_val, True, ":/img/img/shuzhi.png")
         showval.build()
 
         self.treeWidget_1.expandAll()
@@ -296,3 +306,43 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tabWidget.setCurrentWidget(textEdit)
             self.show_result(filename, 0)
             self.new_tab.emit()
+
+    def tab_switch_handle(self, index):
+        if index == -1:
+            self.nothing_open.emit()
+            return
+        textEdit = self.tabWidget.widget(index)
+        fileName = textEdit.get_path() + "/"+textEdit.get_name()
+        print(fileName)
+        self.show_result(fileName, 0)
+
+    def have_main(self, filepath):
+        f = open(self.config_ini['main_project']['project_path']+ self.config_ini['result']['demo'], "w")
+        text = "0$" + filepath + "$\n"
+        f.write(text)
+        f.close()
+        os.system(self.config_ini['main_project']['project_path']+self.config_ini['scanner']['lex']+" < " + filepath)
+        f = open(self.config_ini['main_project']['project_path']+ self.config_ini['result']['demo'], "r")
+        list = f.readlines()
+        code = []
+        for s in list:
+            s.rstrip()
+            str = s.split("$")
+            result = [x.strip() for x in str if x.strip() != '']
+            code.append(result)
+        for s in code:
+            if 'main' in s:
+                i = s.index('main')
+                if s[i+1] == '(':
+                    self.isMain = True
+                    break
+
+    def treeclick_handle(self, item, colum):
+        text = item.text(0)
+        if re.match("^[a-zA-Z]:/", text):
+            self.file_display(text)
+        line = item.text(1).split(":")[-1]
+        if line:
+            line = int(line)
+            textEdit = self.tabWidget.currentWidget()
+            textEdit.setSelection(line, 0, line-1, 0)

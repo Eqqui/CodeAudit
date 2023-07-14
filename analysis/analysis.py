@@ -124,24 +124,31 @@ class Analysis(QtCore.QObject):
 
     def gen_token(self):
         for func in self.funlist:
-            if func.filepath == self.filename:
-                f = [func.name, func.line, func.val_type, []]
-                if func.list:
-                    for val in func.list:
-                        ll = [val.name, val.line, val.val_type]
-                        f[-1].append(ll)
-                self.token_func.append(f)
+            # if func.filepath == self.filename:
+            f = [func.filepath, func.name, func.line, func.val_type, []]
+            if func.list:
+                for val in func.list:
+                    ll = [val.name, val.line, val.val_type]
+                    f[-1].append(ll)
+            self.token_func.append(f)
 
         for val in self.vallist:
             if val.type != 's' and val.type != 'v':
                 continue
-            if val.filepath == self.filename:
-                v = [val.name, val.line, val.val_type, []]
-                if val.list:
-                    for i in val.list:
-                        ii = [i.name, i.line, i.val_type]
-                        v[-1].append(ii)
-                self.token_val.append(v)
+            # if val.filepath == self.filename:
+            #     v = [val.name, val.line, val.val_type, []]
+            #     if val.list:
+            #         for i in val.list:
+            #             ii = [i.name, i.line, i.val_type]
+            #             v[-1].append(ii)
+            #     self.token_val.append(v)
+
+            v = [val.filepath, val.name, val.line, val.val_type, []]
+            if val.list:
+                for i in val.list:
+                    ii = [i.name, i.line, i.val_type]
+                    v[-1].append(ii)
+            self.token_val.append(v)
 
     def gen_danger(self):
         try:
@@ -155,7 +162,8 @@ class Analysis(QtCore.QObject):
                     f = open(file, 'r')
                     s = f.readlines()
                     f.close()
-                    pattern = re.compile("\W"+row[0]+"[(]")
+                    # pattern = re.compile("\W"+row[0]+"[(]")
+                    pattern = re.compile("\s+" + row[0] + "\s*\(")
                     for ss in s:
                         if re.search(pattern, ss) is not None:
                             line = s.index(ss)+1
