@@ -18,8 +18,8 @@ class logWin(QWidget, Ui_loginForm):
             user='root',
             password='',
             charset='utf8mb4',
-            database='code_audit'
         )
+        self.database_name = 'code_audit'
         self.cursor = self.db.cursor()
         self.connect_db()
         self.Login.clicked.connect(self.login)
@@ -93,8 +93,41 @@ class logWin(QWidget, Ui_loginForm):
         return sha256_hash.hexdigest()
 
     def connect_db(self):
+        # database_name = 'your_database'
+        query = f"SHOW DATABASES LIKE '{self.database_name}'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        if result:
+            print("数据库已存在，连接到数据库")
+            self.db.close()
+            self.db = pymysql.connect(
+                host='localhost',  # MySQL服务器地址
+                user='root',  # 用户名
+                password='',  # 密码
+                database=self.database_name
+            )
+            self.cursor = self.db.cursor()
+            pass
+        else:
+            print("数据库不存在，创建数据库")
+            sql = f"CREATE DATABASE {self.database_name}"
+            self.cursor.execute(sql)
+            print(f"数据库 {self.database_name} 创建成功")
+            self.db.commit()
+            # self.db.close()
+            self.db = pymysql.connect(
+                host='localhost',  # MySQL服务器地址
+                user='root',  # 用户名
+                password='',  # 密码
+                database=self.database_name
+            )
+            self.cursor = self.db.cursor()
+            self.creat_table()
+            self.db.commit()
+
+    def creat_table(self):
         table = ["user", "functions"]
-        query = f"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'code_audit' AND TABLE_NAME = '{table[0]}'"
+        query = f"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{self.database_name}' AND TABLE_NAME = '{table[0]}'"
         self.cursor.execute(query)
         result = self.cursor.fetchone()
         if result:
@@ -106,19 +139,9 @@ class logWin(QWidget, Ui_loginForm):
             # 创建数据库
             self.cursor.execute(f"CREATE TABLE {table[0]} (id VARCHAR(20), pass_word VARCHAR(200), PRIMARY KEY (id))")
             file = self.config_ini['main_project']['project_path'] + self.config_ini['db']['user']
-            f = open(file, "r")
-            lines = f.readlines()
-            for s in lines:
-                idd = s.split(" ")[0]
-                pass_word = s.split(" ")[1]
-                print(idd, pass_word)
-                data = [idd, pass_word]
-                sql = f"INSERT INTO {table[0]} (id, pass_word) VALUES (%s,%s)"
-                self.cursor.execute(sql, data)
-                self.db.commit()
+            # TODO: 读取文件插入表
 
-        # 创建表的代码
-        query = f"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'code_audit' AND TABLE_NAME = '{table[1]}'"
+        query = f"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{self.database_name}' AND TABLE_NAME = '{table[1]}'"
         self.cursor.execute(query)
         result = self.cursor.fetchone()
         if result:
@@ -129,15 +152,4 @@ class logWin(QWidget, Ui_loginForm):
             print("表不存在，创建表")
             # 创建数据库
             self.cursor.execute(f"CREATE TABLE {table[1]} (name VARCHAR(20), level VARCHAR(20), description VARCHAR(200), PRIMARY KEY (name))")
-            file = self.config_ini['main_project']['project_path'] + self.config_ini['db']['functions']
-            f = open(file, "r")
-            lines = f.readlines()
-            for s in lines:
-                name = s.split("\t")[0]
-                level = s.split("\t")[1]
-                description = s.split("\t")[2].replace("\n", "")
-                data = [name, level, description]
-                print(data)
-                sql = f"INSERT INTO {table[1]}(name,level,description) VALUES (%s,%s,%s)"
-                self.cursor.execute(sql, data)
-                self.db.commit()
+            # TODO: 读取文件插入表
