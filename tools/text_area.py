@@ -263,7 +263,7 @@ class TextArea(QsciScintilla):
                 line = int(self.parent.token_val[index][2].split(":")[-1])
                 self.setSelection(line, 0, line - 1, 0)
 
-        if str in func_name:
+        elif str in func_name:
             index = func_name.index(str)
             filename = self.parent.token_fun[index][0]
             current_file = self.get_path()+ "/" + self.get_name()
@@ -279,17 +279,18 @@ class TextArea(QsciScintilla):
                 line = int(self.parent.token_fun[index][2].split(":")[-1])
                 self.setSelection(line, 0, line - 1, 0)
 
-        for item in self.parent.token_fun:
-            if item[-1]:
-                filename = item[0]
-                current_file = self.get_path()+ "/" + self.get_name()
-                for val in item[-1]:
-                    if str == val[0]:
-                        line = int(val[1].split(":")[-1])
-                        if current_file!= filename:
-                            self.parent.file_display(filename)
-                            text = self.parent.tabWidget.currentWidget()
-                            text.setSelection(line, 0, line-1, 0)
-                        else:
-                            self.setSelection(line, 0, line - 1, 0)
-                        break
+        else:
+            for item in self.parent.token_fun:
+                if item[-1]:
+                    filename = item[0]
+                    current_file = self.get_path()+ "/" + self.get_name()
+                    for val in item[-1]:
+                        if str == val[0]:
+                            line = int(val[1].split(":")[-1])
+                            if current_file!= filename:
+                                self.parent.file_display(filename)
+                                text = self.parent.tabWidget.currentWidget()
+                                text.setSelection(line, 0, line-1, 0)
+                            else:
+                                self.setSelection(line, 0, line - 1, 0)
+                            break
