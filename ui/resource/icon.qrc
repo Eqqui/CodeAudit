@@ -16,5 +16,10 @@
     <file>img/open-file.png</file>
     <file>img/function.png</file>
     <file>img/shuzhi.png</file>
+    <file>img/backup.png</file>
+    <file>img/huanyuan.png</file>
+    <file>img/repair.png</file>
+    <file>img/bianyi.png</file>
+    <file>img/yunxing.png</file>
   </qresource>
 </RCC>

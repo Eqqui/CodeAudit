@@ -57,6 +57,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Find.triggered.connect(self.find)
         self.Pie.triggered.connect(self.report)
         self.CMD.triggered.connect(self.terminal)
+        self.Compile.triggered.connect(self.compile)
+        self.Run.triggered.connect(self.run)
+        self.Reduc.triggered.connect(self.reduction)
+        self.Backup.triggered.connect(self.backup)
+        self.Repair.triggered.connect(self.repair)
         self.lineEdit.returnPressed.connect(self.execcmd)
         self.tabWidget.tabCloseRequested.connect(self.close_tab)
         self.treeWidget_1.itemClicked.connect(self.expand_collapse_item)
@@ -348,3 +353,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             textEdit = self.tabWidget.currentWidget()
             textEdit.setSelection(line, 0, line-1, 0)
 
+    def compile(self):
+        # TODO: compile
+        print("compile")
+
+    def run(self):
+        # TODO: run
+        print("run")
+
+    def reduction(self):
+        # TODO: reduction
+        print("reduction")
+
+    def backup(self):
+        # TODO: backup
+        print("backup")
+
+    def repair(self):
+        # TODO: repair
+        print("repair")

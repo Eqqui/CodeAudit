@@ -287,7 +287,7 @@ class TextArea(QsciScintilla):
                     for val in item[-1]:
                         if str == val[0]:
                             line = int(val[1].split(":")[-1])
-                            if current_file!= filename:
+                            if current_file != filename:
                                 self.parent.file_display(filename)
                                 text = self.parent.tabWidget.currentWidget()
                                 text.setSelection(line, 0, line-1, 0)
