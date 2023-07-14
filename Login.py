@@ -106,7 +106,7 @@ class logWin(QWidget, Ui_loginForm):
                 user=self.config_ini['db_set']['user_name'],
                 password=self.config_ini['db_set']['password'],
                 charset='utf8mb4',
-                database=self.database_name
+                database=self.config_ini['db_set']['database_name']
             )
             self.cursor = self.db.cursor()
             pass
@@ -123,7 +123,7 @@ class logWin(QWidget, Ui_loginForm):
                 user=self.config_ini['db_set']['user_name'],
                 password=self.config_ini['db_set']['password'],
                 charset='utf8mb4',
-                database=self.database_name
+                database=self.config_ini['db_set']['database_name']
             )
             self.cursor = self.db.cursor()
             self.creat_table()

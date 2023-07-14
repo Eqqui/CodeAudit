@@ -1,12 +1,15 @@
 import os
 import re
 import subprocess
+import threading
 
 from PyQt5 import QtGui
 from PyQt5.Qsci import QsciScintilla
 from PyQt5.QtCore import pyqtSignal, QEvent
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QFileSystemModel, QAction, QMenu
+
+from db.db_manage import DB
 from ui.startWidget import Ui_MainWindow
 from os.path import split as split_pathname
 from tools.text_area import TextArea
@@ -328,7 +331,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.show_result(fileName, 0)
 
     def have_main(self, filepath):
-        f = open(self.config_ini['main_project']['project_path'] + self.config_ini['result']['demo'], "w")
+        f = open(self.config_ini['main_project']['project_path']+ self.config_ini['result']['demo'], "w")
         text = "0$" + filepath + "$\n"
         f.write(text)
         f.close()
@@ -369,14 +372,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def reduction(self):
         # TODO: reduction
         print("reduction")
+        f = self.config_ini['main_project']['project_path'] + self.config_ini['db']['danger_funcs']
+        db=DB(f)
+        # print(db.get_key())
+        new_thread=threading.Thread(target=db.insert_table,kwargs={'choose':1})
+        new_thread.start()
+
 
     def backup(self):
         # TODO: backup
         print("backup")
+        f = self.config_ini['main_project']['project_path'] + self.config_ini['db']['danger_funcs']
+        db=DB(f)
+        # db.table_to_file('func')
+        new_thread = threading.Thread(target=db.table_to_file)
+        new_thread.start()
+
 
     def repair(self):
         # TODO: repair
         print("repair")
+        f = self.config_ini['main_project']['project_path'] + self.config_ini['db']['danger_funcs']
+        db = DB(f)
+        # print(db.get_key())
+        # db.insert_table('func', 2)
+        new_thread = threading.Thread(target=db.insert_table,kwargs={'choose':2})
+        new_thread.start()
+
+
 
     def theme_change(self):
         if not self.mode:
