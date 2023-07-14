@@ -14,12 +14,12 @@ class logWin(QWidget, Ui_loginForm):
         self.config_ini = self.config.read_config()
         self.db = pymysql.connect(
             host="localhost",
-            port=3306,
-            user='root',
-            password='',
+            port=int(self.config_ini['db_set']['port']),
+            user=self.config_ini['db_set']['user_name'],
+            password=self.config_ini['db_set']['password'],
             charset='utf8mb4',
         )
-        self.database_name = 'code_audit'
+        self.database_name = self.config_ini['db_set']['database_name']
         self.cursor = self.db.cursor()
         self.connect_db()
         self.Login.clicked.connect(self.login)

@@ -154,7 +154,7 @@ class Analysis(QtCore.QObject):
 
     def gen_danger(self):
         for file in self.filelist:
-            dangers=Danger(file)
+            dangers=Danger(file, self.config_ini)
             dangers.findDanger()
             self.danger.extend(dangers.danger)
         # try:
