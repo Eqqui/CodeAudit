@@ -2,15 +2,22 @@ from PyQt5.QtWidgets import *
 from ui.functionWidget import Ui_functionDialog
 import pymysql
 
-db = pymysql.connect(
+# db = pymysql.connect(
+#     host="localhost",
+#     port=3306,
+#     user='root',
+#     password='',
+#     charset='utf8mb4',
+#     database='code_audit'
+#     )
+db=pymysql.connect(
     host="localhost",
     port=3306,
     user='root',
-    password='',
+    password='111111',
     charset='utf8mb4',
     database='code_audit'
-    )
-
+)
 cursor = db.cursor()
 
 class functionForm(QDialog, Ui_functionDialog):
