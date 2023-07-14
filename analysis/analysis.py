@@ -2,17 +2,19 @@ import os.path
 import re
 from PyQt5 import QtCore
 import pymysql
+
+from analysis.find_danger import Danger
 from config.config import Config
 
-db = pymysql.connect(
-    host="localhost",
-    port=3306,
-    user='root',
-    password='',
-    charset='utf8mb4',
-    database='code_audit'
-)
-cursor = db.cursor()
+# db = pymysql.connect(
+#     host="localhost",
+#     port=3306,
+#     user='root',
+#     password='',
+#     charset='utf8mb4',
+#     database='code_audit'
+# )
+# cursor = db.cursor()
 
 class Function:
     def __init__(self, filepath='', name='', val_type='', type="", line=""):
@@ -151,27 +153,31 @@ class Analysis(QtCore.QObject):
             self.token_val.append(v)
 
     def gen_danger(self):
-        try:
-            sql = "SELECT * FROM functions"
-            cursor.execute(sql)
-            # results = cursor.fetchall()
-            for row in cursor:
-                # self.table_add(row[0], row[1], row[2])
-                # print(row)
-                for file in self.filelist:
-                    f = open(file, 'r')
-                    s = f.readlines()
-                    f.close()
-                    # pattern = re.compile("\W"+row[0]+"[(]")
-                    pattern = re.compile("\s+" + row[0] + "\s*\(")
-                    for ss in s:
-                        if re.search(pattern, ss) is not None:
-                            line = s.index(ss)+1
-                            d = [file, "line:"+str(line), row[0], row[1], row[2]]
-                            self.danger.append(d)
-        except Exception as e:
-            print(e)
-            db.rollback()  # 回滚事务
+        for file in self.filelist:
+            dangers=Danger(file)
+            dangers.findDanger()
+            self.danger.extend(dangers.danger)
+        # try:
+        #     sql = "SELECT * FROM functions"
+        #     cursor.execute(sql)
+        #     # results = cursor.fetchall()
+        #     for row in cursor:
+        #         # self.table_add(row[0], row[1], row[2])
+        #         # print(row)
+        #         for file in self.filelist:
+        #             f = open(file, 'r')
+        #             s = f.readlines()
+        #             f.close()
+        #             # pattern = re.compile("\W"+row[0]+"[(]")
+        #             pattern = re.compile("\s+" + row[0] + "\s*\(")
+        #             for ss in s:
+        #                 if re.search(pattern, ss) is not None:
+        #                     line = s.index(ss)+1
+        #                     d = [file, "line:"+str(line), row[0], row[1], row[2]]
+        #                     self.danger.append(d)
+        # except Exception as e:
+        #     print(e)
+        #     db.rollback()  # 回滚事务
 
     def gen_invalid(self):
         for f in self.funlist:
