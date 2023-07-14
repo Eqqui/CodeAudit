@@ -1,32 +1,38 @@
 from PyQt5.QtWidgets import *
 from ui.functionWidget import Ui_functionDialog
 import pymysql
-
-# db = pymysql.connect(
-#     host="localhost",
-#     port=3306,
-#     user='root',
-#     password='',
-#     charset='utf8mb4',
-#     database='code_audit'
-#     )
-db=pymysql.connect(
-    host="localhost",
-    port=3306,
-    user='root',
-    password='111111',
-    charset='utf8mb4',
-    database='code_audit'
-)
-cursor = db.cursor()
+from config.config import Config
 
 class functionForm(QDialog, Ui_functionDialog):
     def __init__(self, parent=None):
         super(functionForm, self).__init__(parent)
         self.setupUi(self)
-        self.context_show()
         self.pushButton.clicked.connect(self.add)
         self.pushButton_2.clicked.connect(self.delete)
+        self.config = Config()
+        self.config_ini = self.config.read_config()
+
+        # self.db = pymysql.connect(
+        #     host="localhost",
+        #     port=int(self.config_ini['db_set']['port']),
+        #     user=self.config_ini['db_set']['user_name'],
+        #     password=self.config_ini['db_set']['password'],
+        #     charset='utf8mb4',
+        #     database=self.config_ini['db_set']['database_name']
+        # )
+        self.db = pymysql.connect(
+            host="localhost",
+            port=int(self.config_ini['db_set']['port']),
+            user=self.config_ini['db_set']['user_name'],
+            password=self.config_ini['db_set']['password'],
+            charset='utf8mb4',
+            database=self.config_ini['db_set']['database_name']
+        )
+        # self.database_name = self.config_ini['db_set']['database_name']
+        # self.cursor = self.db.cursor()
+        self.cursor = self.db.cursor()
+        self.context_show()
+
 
     def add(self):
 
@@ -44,16 +50,15 @@ class functionForm(QDialog, Ui_functionDialog):
         self.lineEdit_2.clear()
 
     def context_show(self):
-
         try:
             sql = "SELECT * FROM functions"
-            cursor.execute(sql)
-            results = cursor.fetchall()
+            self.cursor.execute(sql)
+            results = self.cursor.fetchall()
             for row in results:
                 self.table_add(row[0], row[1], row[2])
         except Exception as e:
             print(e)
-            db.rollback()  # 回滚事务
+            # self.db.rollback()  # 回滚事务
 
 
     def table_add(self, fun_name, fun_level, fun_solution):
@@ -82,11 +87,11 @@ class functionForm(QDialog, Ui_functionDialog):
             print("name_text:",name_text)
             try:
                 sql = "DELETE FROM functions WHERE name = %s"
-                cursor.execute(sql,name_text)
-                db.commit()
+                self.cursor.execute(sql,name_text)
+                self.db.commit()
             except Exception as e:
                 print(e)
-                db.rollback()  # 回滚事务
+                self.db.rollback()  # 回滚事务
         else:
             print("delete null")
 
@@ -94,8 +99,8 @@ class functionForm(QDialog, Ui_functionDialog):
 
         data=(fun_name,fun_level,fun_solution)
         sql = "INSERT INTO functions (name,level,description) VALUES (%s,%s,%s)"
-        cursor.execute(sql, data)
-        db.commit()
+        self.cursor.execute(sql, data)
+        self.commit()
 
 
 

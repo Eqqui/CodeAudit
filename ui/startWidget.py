@@ -103,7 +103,10 @@ class Ui_MainWindow(object):
         self.menu.setObjectName("menu")
         self.DB = QtWidgets.QMenu(self.menubar)
         self.DB.setObjectName("DB")
+        self.View = QtWidgets.QMenu(self.menubar)
+        self.View.setObjectName("View")
         MainWindow.setMenuBar(self.menubar)
+
 
         self.Open = QtWidgets.QAction(MainWindow)
         icon = QtGui.QIcon()
@@ -252,6 +255,18 @@ class Ui_MainWindow(object):
         icon16.addPixmap(QtGui.QPixmap(":/img/img/repair.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.Repair.setIcon(icon16)
 
+        self.Dark = QtWidgets.QAction(MainWindow)
+        self.Dark.setObjectName("Dark")
+        icon19 = QtGui.QIcon()
+        icon19.addPixmap(QtGui.QPixmap(":/img/img/moon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.Dark.setIcon(icon19)
+
+        self.Light = QtWidgets.QAction(MainWindow)
+        self.Light.setObjectName("Light")
+        icon20 = QtGui.QIcon()
+        icon20.addPixmap(QtGui.QPixmap(":/img/img/sun.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.Light.setIcon(icon20)
+
         self.File.addAction(self.Open)
         self.File.addAction(self.Save)
         self.File.addAction(self.Saveas)
@@ -273,11 +288,14 @@ class Ui_MainWindow(object):
         self.DB.addAction(self.Reduc)
         self.DB.addAction(self.Backup)
         self.DB.addAction(self.Repair)
+        self.View.addAction(self.Dark)
+        self.View.addAction(self.Light)
         self.menubar.addAction(self.File.menuAction())
         self.menubar.addAction(self.Edit.menuAction())
         self.menubar.addAction(self.Window.menuAction())
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.DB.menuAction())
+        self.menubar.addAction(self.View.menuAction())
 
         self.retranslateUi(MainWindow)
         self.tabWidget_2.setCurrentIndex(0)
@@ -301,6 +319,7 @@ class Ui_MainWindow(object):
         self.Window.setTitle(_translate("MainWindow", "窗口"))
         self.menu.setTitle(_translate("MainWindow", "调试"))
         self.DB.setTitle(_translate("MainWindow", "数据库管理"))
+        self.View.setTitle(_translate("MainWindow", "主题"))
         # self.New.setText(_translate("MainWindow", "新建"))
         # self.New.setShortcut(_translate("MainWindow", "Ctrl+N"))
         self.Open.setText(_translate("MainWindow", "打开文件"))
@@ -333,4 +352,6 @@ class Ui_MainWindow(object):
         self.Reduc.setText(_translate("MainWindow", "还原"))
         self.Backup.setText(_translate("MainWindow", "备份"))
         self.Repair.setText(_translate("MainWindow", "修复"))
+        self.Dark.setText(_translate("MainWindow", "夜间模式"))
+        self.Light.setText(_translate("MainWindow", "日间模式"))
 from ui.resource import icon_rc

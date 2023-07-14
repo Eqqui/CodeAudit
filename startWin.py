@@ -15,6 +15,7 @@ from function.function import functionForm
 from config.config import Config
 from analysis.analysis import Analysis
 from tools.treedview import BuildTree
+from qt_material import apply_stylesheet
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -39,6 +40,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.infun = []
         self.inval = []
 
+        self.mode = 0
+
     def slot(self):
         # 槽函数
         self.new_tab.connect(self.enable_eidting)
@@ -62,6 +65,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Reduc.triggered.connect(self.reduction)
         self.Backup.triggered.connect(self.backup)
         self.Repair.triggered.connect(self.repair)
+        self.Dark.triggered.connect(self.theme_change)
+        self.Light.triggered.connect(self.theme_change)
         self.lineEdit.returnPressed.connect(self.execcmd)
         self.tabWidget.tabCloseRequested.connect(self.close_tab)
         self.treeWidget_1.itemClicked.connect(self.expand_collapse_item)
@@ -323,7 +328,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.show_result(fileName, 0)
 
     def have_main(self, filepath):
-        f = open(self.config_ini['main_project']['project_path']+ self.config_ini['result']['demo'], "w")
+        f = open(self.config_ini['main_project']['project_path'] + self.config_ini['result']['demo'], "w")
         text = "0$" + filepath + "$\n"
         f.write(text)
         f.close()
@@ -372,3 +377,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def repair(self):
         # TODO: repair
         print("repair")
+
+    def theme_change(self):
+        if not self.mode:
+            apply_stylesheet(self, 'dark_blue.xml', css_file  = 'ui/dark_style.css')
+            self.mode = True
+        else:
+            apply_stylesheet(self, 'light_blue.xml', css_file = 'ui/light_style.css')
+            self.mode = False
