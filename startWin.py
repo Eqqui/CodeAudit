@@ -5,9 +5,9 @@ import threading
 
 from PyQt5 import QtGui
 from PyQt5.Qsci import QsciScintilla
-from PyQt5.QtCore import pyqtSignal, QEvent
+from PyQt5.QtCore import pyqtSignal, QEvent, QThread
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QFileSystemModel, QAction, QMenu
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QFileSystemModel, QAction, QMenu, QProgressDialog
 
 from db.db_manage import DB
 from ui.startWidget import Ui_MainWindow
@@ -19,6 +19,7 @@ from config.config import Config
 from analysis.analysis import Analysis
 from tools.treedview import BuildTree
 from qt_material import apply_stylesheet
+from ui.loadWidget import LoadingDialog
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -43,7 +44,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.infun = []
         self.inval = []
 
-        self.mode = 0
 
     def slot(self):
         # 槽函数
@@ -68,8 +68,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Reduc.triggered.connect(self.reduction)
         self.Backup.triggered.connect(self.backup)
         self.Repair.triggered.connect(self.repair)
-        self.Dark.triggered.connect(self.theme_change)
-        self.Light.triggered.connect(self.theme_change)
+        self.Dark.triggered.connect(self.to_dark)
+        self.Light.triggered.connect(self.to_light)
         self.lineEdit.returnPressed.connect(self.execcmd)
         self.tabWidget.tabCloseRequested.connect(self.close_tab)
         self.treeWidget_1.itemClicked.connect(self.expand_collapse_item)
@@ -87,7 +87,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         path, name = split_pathname(fileName)
 
         if isOk:
-            # print(fileName)
             self.have_main(fileName)
             print(self.isMain)
 
@@ -265,8 +264,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def show_result(self, fileName, flag):
 
-        # a = Analysis(fileName, self.config_ini)
-        # self.token_fun, self.token_val, self.danger, self.infun, self.inval = a.run()
         if flag == 1:
             self.treeWidget.clear()
             a = Analysis(fileName, self.config_ini)
@@ -284,7 +281,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.treeWidget_1.clear()
         show_func = [func for func in self.token_fun if func[0] == fileName]
         show_val = [val for val in self.token_val if val[0] == fileName]
-        # print(show_func)
         showfunc = BuildTree(self.treeWidget_1, "函数", show_func, True,  ":/img/img/function.png")
         showfunc.build()
 
@@ -327,7 +323,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
         textEdit = self.tabWidget.widget(index)
         fileName = textEdit.get_path() + "/"+textEdit.get_name()
-        # print(fileName)
         self.show_result(fileName, 0)
 
     def have_main(self, filepath):
@@ -370,41 +365,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print("run")
 
     def reduction(self):
-        # TODO: reduction
-        print("reduction")
         f = self.config_ini['main_project']['project_path'] + self.config_ini['db']['danger_funcs']
         db=DB(f)
-        # print(db.get_key())
-        new_thread=threading.Thread(target=db.insert_table,kwargs={'choose':1})
+        wait = LoadingDialog(self)
+        new_thread = threading.Thread(target=db.insert_table,kwargs={'choose':1})
         new_thread.start()
-
+        db.finished.connect(wait.close)
+        wait.show()
 
     def backup(self):
-        # TODO: backup
-        print("backup")
         f = self.config_ini['main_project']['project_path'] + self.config_ini['db']['danger_funcs']
         db=DB(f)
         # db.table_to_file('func')
+        wait = LoadingDialog(self)
         new_thread = threading.Thread(target=db.table_to_file)
         new_thread.start()
-
+        db.finished.connect(wait.close)
+        wait.show()
 
     def repair(self):
-        # TODO: repair
-        print("repair")
         f = self.config_ini['main_project']['project_path'] + self.config_ini['db']['danger_funcs']
         db = DB(f)
-        # print(db.get_key())
-        # db.insert_table('func', 2)
+        wait = LoadingDialog(self)
         new_thread = threading.Thread(target=db.insert_table,kwargs={'choose':2})
         new_thread.start()
+        db.finished.connect(wait.close)
+        wait.show()
 
+    def to_dark(self):
+        apply_stylesheet(self, 'dark_blue.xml', css_file  = 'ui/dark_style.css')
 
-
-    def theme_change(self):
-        if not self.mode:
-            apply_stylesheet(self, 'dark_blue.xml', css_file  = 'ui/dark_style.css')
-            self.mode = True
-        else:
-            apply_stylesheet(self, 'light_blue.xml', css_file = 'ui/light_style.css')
-            self.mode = False
+    def to_light(self):
+        apply_stylesheet(self, 'light_blue.xml', invert_secondary=True, css_file = 'ui/light_style.css')

@@ -4,17 +4,7 @@ from PyQt5 import QtCore
 import pymysql
 
 from analysis.find_danger import Danger
-from config.config import Config
 
-# db = pymysql.connect(
-#     host="localhost",
-#     port=3306,
-#     user='root',
-#     password='',
-#     charset='utf8mb4',
-#     database='code_audit'
-# )
-# cursor = db.cursor()
 
 class Function:
     def __init__(self, filepath='', name='', val_type='', type="", line=""):
@@ -62,9 +52,7 @@ class Analysis(QtCore.QObject):
         path, name = os.path.split(self.filename)
         self.get_file(path)
         cpath = self.config_ini['main_project']['project_path'] + self.config_ini['scanner']['ctags']
-        # print(cpath)
         cmd = cpath + " --languages=c -R -I argv --kinds-c=+defglmpstuvx --fields=+n"
-        # cmd = "D:\AAtestplaceforcode\CodeAudit\\tools\scanner\ctags.exe --languages=c -R -I argv --kinds-c=+defglmpstuvx --fields=+n"
         for file in self.filelist:
             cmd += " " + file
         os.system(cmd)
@@ -126,7 +114,6 @@ class Analysis(QtCore.QObject):
 
     def gen_token(self):
         for func in self.funlist:
-            # if func.filepath == self.filename:
             f = [func.filepath, func.name, func.line, func.val_type, []]
             if func.list:
                 for val in func.list:
@@ -137,14 +124,6 @@ class Analysis(QtCore.QObject):
         for val in self.vallist:
             if val.type != 's' and val.type != 'v':
                 continue
-            # if val.filepath == self.filename:
-            #     v = [val.name, val.line, val.val_type, []]
-            #     if val.list:
-            #         for i in val.list:
-            #             ii = [i.name, i.line, i.val_type]
-            #             v[-1].append(ii)
-            #     self.token_val.append(v)
-
             v = [val.filepath, val.name, val.line, val.val_type, []]
             if val.list:
                 for i in val.list:
@@ -157,27 +136,6 @@ class Analysis(QtCore.QObject):
             dangers=Danger(file, self.config_ini)
             dangers.findDanger()
             self.danger.extend(dangers.danger)
-        # try:
-        #     sql = "SELECT * FROM functions"
-        #     cursor.execute(sql)
-        #     # results = cursor.fetchall()
-        #     for row in cursor:
-        #         # self.table_add(row[0], row[1], row[2])
-        #         # print(row)
-        #         for file in self.filelist:
-        #             f = open(file, 'r')
-        #             s = f.readlines()
-        #             f.close()
-        #             # pattern = re.compile("\W"+row[0]+"[(]")
-        #             pattern = re.compile("\s+" + row[0] + "\s*\(")
-        #             for ss in s:
-        #                 if re.search(pattern, ss) is not None:
-        #                     line = s.index(ss)+1
-        #                     d = [file, "line:"+str(line), row[0], row[1], row[2]]
-        #                     self.danger.append(d)
-        # except Exception as e:
-        #     print(e)
-        #     db.rollback()  # 回滚事务
 
     def gen_invalid(self):
         for f in self.funlist:
@@ -261,10 +219,3 @@ class Analysis(QtCore.QObject):
         pattern = re.compile("[0-9]+")
         m = re.search(pattern, line)
         return m.group(0)
-
-
-# if __name__ == '__main__':
-#     con = Config()
-#     ini = con.read_config()
-#     a = Analysis("D:/AAtestplaceforcode/code_aduit/", ini)
-#     func, val, d, vf, vv = a.run()

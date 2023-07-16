@@ -20,7 +20,6 @@ class Danger(object):
 
     def process_directive(self, hitlist):
         global ignoreline, num_ignored_hits
-        # TODO: Currently this is just a stub routine that simply removes
         hitfound = 0
         for i in range(len(hitlist) - 1, -1, -1):
             if hitlist[i].filename == filename and hitlist[i].line == linenumber:
@@ -381,7 +380,7 @@ class Danger(object):
             return False
 
     def find_table_flaw(self, word, index):
-        sql = "SELECT * FROM functions"
+        sql = f"SELECT * FROM {self.config_ini['db_set']['form_2']}"
         self.cursor.execute(sql)
         results = self.cursor.fetchall()
         for row in results:

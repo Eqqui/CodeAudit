@@ -86,7 +86,7 @@ class functionForm(QDialog, Ui_functionDialog):
             name_text=name_item.text()
             print("name_text:",name_text)
             try:
-                sql = "DELETE FROM functions WHERE name = %s"
+                sql = f"DELETE FROM {self.config_ini['db_set']['form_2']}  WHERE name = %s"
                 self.cursor.execute(sql,name_text)
                 self.db.commit()
             except Exception as e:
@@ -98,9 +98,9 @@ class functionForm(QDialog, Ui_functionDialog):
     def db_add(self,fun_name,fun_level,fun_solution):
 
         data=(fun_name,fun_level,fun_solution)
-        sql = "INSERT INTO functions (name,level,description) VALUES (%s,%s,%s)"
+        sql = f"INSERT INTO {self.config_ini['db_set']['form_2']}(name,level,description) VALUES (%s,%s,%s)"
         self.cursor.execute(sql, data)
-        self.commit()
+        self.db.commit()
 
 
 

@@ -42,7 +42,7 @@ class logWin(QWidget, Ui_loginForm):
                 # self.Account.clear()
                 self.Password.clear()
             elif admit==2:
-                QMessageBox.information(self, "登录成功", "登录成功！")
+                # QMessageBox.information(self, "登录成功", "登录成功！")
                 self.win = MainWindow()
                 self.win.show()
                 self.hide()
@@ -122,6 +122,7 @@ class logWin(QWidget, Ui_loginForm):
                 database=self.config_ini['db_set']['database_name']
             )
             self.cursor = self.db.cursor()
+            self.creat_table()
             pass
         else:
             print("数据库不存在，创建数据库")
