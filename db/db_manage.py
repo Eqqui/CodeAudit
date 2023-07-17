@@ -1,5 +1,8 @@
 import base64
 import secrets
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 
 import pymysql
 from PyQt5.QtCore import pyqtSignal, QObject
@@ -19,6 +22,7 @@ class DB(QObject):
         self.key="C:/Users/chickey/Documents/huaxin/CodeAudit/db/danger_funcs.txt"
         self.config=Config()
         self.config_ini=self.config.read_config()
+        self.pool=ThreadPoolExecutor(max_workers=10)
         self.database_name = self.config_ini['db_set']['database_name']
         self.conn = pymysql.connect(
             host="localhost",
@@ -75,19 +79,38 @@ class DB(QObject):
         encrypted_data = base64.b64encode(ciphertext).decode()
         return encrypted_data
 
+    def process_data(self,table,input):
+        output=[]
+        for item in input:
+            o_item=tuple(self.decrypt(data)for data in item)
+            output.append(o_item)
+            print(f"decrypt_data:{o_item}")
+        for item in output:
+            sql = f"INSERT INTO {table} (name, level, description) VALUES (%s, %s, %s)"
+            self.cursor.execute(sql, item)
+            self.conn.commit()
+
+    def process_item(self,input,file):
+        output=[]
+        for item in input:
+            o_item=tuple(self.encrypt(data)for data in item)
+            output.append(o_item)
+            print(f"encrypt_data:{o_item}")
+        for item in output:
+            file.write(item[0]+'\t'+item[1]+'\t'+item[2]+'\n')
+
     def table_to_file(self):
+        rows=[]
         table_name=self.config_ini['db_set']['form_2']
         ff=self.config_ini['main_project']['project_path']+self.config_ini['db']['back_up']
         with open(ff, 'w') as file:
             self.cursor.execute(f'SELECT * FROM {table_name}')
             results=self.cursor.fetchall()
             for row in results:
-                # 加密内容
-                print(row[0],row[1],row[2])
-                name = self.encrypt(row[0])
-                level = self.encrypt(row[1])
-                solution = self.encrypt(row[2])
-                file.write(name + "\t" + level + "\t" + solution + '\n')
+                rows.append(tuple(row))
+                print(tuple(row))
+            thread2=self.pool.submit(self.process_item,rows,file)
+            thread2.result()
         self.finished.emit()
 
     def table_clear(self,table_name):
@@ -100,7 +123,13 @@ class DB(QObject):
             self.conn.commit()
         else:
             return
-
+    def insert_func(self,table,file):
+        encrypted_data = []
+        with open(file, 'r') as encrypted_file:
+            for line in encrypted_file:
+                encrypted_data.append(tuple(line.strip().split('\t')))
+        thread1=self.pool.submit(self.process_data, table, encrypted_data)
+        thread1.result()
     def insert_user(self,table):
         f=self.config_ini['main_project']['project_path']+self.config_ini['db']['user']
         with open(f,'r')as user_file:
@@ -113,27 +142,8 @@ class DB(QObject):
                     self.conn.commit()
 
 
-    def insert_func(self,table,file):
-        with open(file, 'r') as encrypted_file:
-            for line in encrypted_file:
-                # 解码加密后的结果
-                encrypted_data = line.strip().split('\t')
-                name = encrypted_data[0]
-                level = encrypted_data[1]
-                solution = encrypted_data[2]
-                # 解密数据
-                decrypted_name = self.decrypt(name)
-                decrypted_level = self.decrypt(level)
-                decrypted_solution = self.decrypt(solution)
-
-                data = (decrypted_name, decrypted_level, decrypted_solution)
-                # print(data)
-                sql = f"INSERT INTO {table} (name,level,description) VALUES (%s,%s,%s)"
-                self.cursor.execute(sql, data)
-                self.conn.commit()
-            # self.finished.emit()
-
     def insert_table(self,choose):
+        start_time=time.time()
         table_name_1=self.config_ini['db_set']['form_1']
         table_name_2=self.config_ini['db_set']['form_2']
         self.table_clear(table_name_2)
@@ -150,3 +160,7 @@ class DB(QObject):
         if choose==3:
             self.insert_user(table_name_1)
             self.finished.emit()
+        end_time=time.time()
+        print('execute for:',end_time-start_time)
+
+

@@ -12,14 +12,7 @@ class functionForm(QDialog, Ui_functionDialog):
         self.config = Config()
         self.config_ini = self.config.read_config()
 
-        # self.db = pymysql.connect(
-        #     host="localhost",
-        #     port=int(self.config_ini['db_set']['port']),
-        #     user=self.config_ini['db_set']['user_name'],
-        #     password=self.config_ini['db_set']['password'],
-        #     charset='utf8mb4',
-        #     database=self.config_ini['db_set']['database_name']
-        # )
+
         self.db = pymysql.connect(
             host="localhost",
             port=int(self.config_ini['db_set']['port']),
