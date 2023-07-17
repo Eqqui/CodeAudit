@@ -4,8 +4,7 @@ from PyQt5 import QtCore
 import pymysql
 
 from analysis.find_danger import Danger
-
-
+# from find_danger import Danger
 class Function:
     def __init__(self, filepath='', name='', val_type='', type="", line=""):
         self.filepath = filepath
