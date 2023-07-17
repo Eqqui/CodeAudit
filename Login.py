@@ -162,8 +162,7 @@ class logWin(QWidget, Ui_loginForm):
             # file = self.config_ini['main_project']['project_path'] + self.config_ini['db']['user']
 
             db=DB(" ")
-            new_thread=threading.Thread(target=db.insert_table,kwargs={'choose':3})
-            new_thread.start()
+            db.insert_table(3)
 
 
         query = f"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{self.database_name}' AND TABLE_NAME = '{table_name_2}'"
@@ -181,5 +180,6 @@ class logWin(QWidget, Ui_loginForm):
             f = self.config_ini['main_project']['project_path'] + self.config_ini['db']['danger_funcs']
             db = DB(f)
             # print(db.get_key())
-            new_thread = threading.Thread(target=db.insert_table, kwargs={'choose': 1})
-            new_thread.start()
+            # new_thread = threading.Thread(target=db.insert_table, kwargs={'choose': 1})
+            # new_thread.start()
+            db.insert_table(1)

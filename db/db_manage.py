@@ -1,6 +1,4 @@
 import base64
-import secrets
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -131,36 +129,46 @@ class DB(QObject):
         thread1=self.pool.submit(self.process_data, table, encrypted_data)
         thread1.result()
     def insert_user(self,table):
+        print('user running')
         f=self.config_ini['main_project']['project_path']+self.config_ini['db']['user']
+        print(f'db_name:{f}')
         with open(f,'r')as user_file:
-            if not bool(user_file.read()):
-                for line in user_file:
-                    user_info=line.split('\t')
-                    data=(user_info[0],user_info[1])
-                    sql = f"INSERT INTO {table} (id,pass_word) VALUES (%s,%s)"
-                    self.cursor.execute(sql,data)
-                    self.conn.commit()
+            for line in user_file:
+                print(line)
+                user_info=line.split('\t')
+                data=(user_info[0],user_info[1].replace('\n',''))
+                sql = f"INSERT INTO {table} (id,pass_word) VALUES (%s,%s);"
+                self.cursor.execute(sql,data)
+                self.conn.commit()
 
 
     def insert_table(self,choose):
-        start_time=time.time()
+        # start_time=time.time()
         table_name_1=self.config_ini['db_set']['form_1']
         table_name_2=self.config_ini['db_set']['form_2']
-        self.table_clear(table_name_2)
-        # print("insert")
         if choose==1:
+            start_time = time.time()
+            self.table_clear(table_name_2)
             f=self.config_ini['main_project']['project_path']+self.config_ini['db']['danger_funcs']
             self.insert_func(table_name_2,f)
+            end_time = time.time()
+            print('execute for:', end_time - start_time)
             self.finished.emit()
             # print("finish")
         if choose==2:
+            start_time = time.time()
+            self.table_clear(table_name_2)
             f = self.config_ini['main_project']['project_path'] + self.config_ini['db']['back_up']
             self.insert_func(table_name_2,f)
+            end_time = time.time()
+            print('execute for:', end_time - start_time)
             self.finished.emit()
         if choose==3:
+            start_time = time.time()
             self.insert_user(table_name_1)
+            end_time = time.time()
+            print('execute for:', end_time - start_time)
             self.finished.emit()
-        end_time=time.time()
-        print('execute for:',end_time-start_time)
+
 
 

@@ -111,9 +111,37 @@ class Analysis(QtCore.QObject):
                     list.append(f)
         self.filelist = list
 
+    def gen_params(self,file,fun_line,fun_name):
+            with open(file,'r')as f:
+                print(f"fun{fun_name},type:{type(fun_name)}")
+                lines=f.readlines()
+                if 1<=int(fun_line.split(':')[1])<=len(lines):
+                    content=lines[int(fun_line.split(':')[1])-1]
+                    if fun_name in content:
+                        text=[]
+                        value=[]
+                        start_pos=content.find(fun_name)
+                        end_pos=start_pos+len(fun_name)
+                        danger=Danger("",self.config_ini)
+                        print(text[start_pos:end_pos])
+                        params=danger.extract_c_parameters(content,end_pos)
+                        for param in params:
+                            if len(param)!=0:
+                                v=param.split(' ')
+                                vv=[v[1],fun_line,v[0]]
+                                value.append(vv)
+                                print(f"vv:{value}")
+                        # print(f'{fun_name}:{params}')
+                        return value
+
+
+
     def gen_token(self):
         for func in self.funlist:
             f = [func.filepath, func.name, func.line, func.val_type, []]
+            params=self.gen_params(func.filepath,func.line,func.name)
+            print("token:",params)
+            f[-1]=params
             if func.list:
                 for val in func.list:
                     ll = [val.name, val.line, val.val_type]
